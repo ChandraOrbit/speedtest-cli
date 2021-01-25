@@ -22,7 +22,7 @@
 
 #define MAX_ISP_NAME         255
 #define MAX_IPADDRESS_STRLEN 48
-#define MAX_CLOSEST_SERVER_NUM 5
+#define MAX_CLOSEST_SERVER_NUM 100
 
 #define RECORED_EVERY_SEC    0.2
 #define PRINT_RECORED_NUM    2
@@ -192,18 +192,36 @@ static void XMLCALL start_element(void *userData, const char *el, const char **a
     if (depth == 2 && strcmp(el, "server") == 0) {
         struct server_info *p_server = (struct server_info *)userData;
 
+//#define PRTF(fmt,...) printf(fmt,...)
+#define PRTF(fmt,...)
+
         for (i = 0; atts[i]; i += 2) {
             //printf(" %s \n", atts[i]);
             if (strcmp(atts[i], "url") == 0)
+	    {
                 strcpy(p_server->url, atts[i + 1]);
+		PRTF(" %s : %s\n", atts[i], atts[i + 1]) ;
+	    }
             if (strcmp(atts[i], "country") == 0)
+	    {
                 strcpy(p_server->country, atts[i + 1]);
+		PRTF(" %s : %s\n", atts[i], atts[i + 1]) ;
+	    }
             if (strcmp(atts[i], "lat") == 0)
+	    {
                 p_server->lat = atof(atts[i + 1]);
+		PRTF(" %s : %lf\n", atts[i], p_server->lat) ;
+	    }
             if (strcmp(atts[i], "lon") == 0)
+	    {
                 p_server->lon = atof(atts[i + 1]);
+		PRTF(" %s : %lf\n", atts[i], p_server->lon) ;
+	    }
             if (strcmp(atts[i], "id") == 0)
+	    {
                 p_server->id = atof(atts[i + 1]);
+		PRTF(" %s : %d\n", atts[i], p_server->id) ;
+	    }
         }
     }
     depth++;
@@ -253,16 +271,18 @@ static int do_latency(char *p_url)
     curl = curl_easy_init();
 
     sprintf(latency_url, "%s%s", p_url, LATENCY_TXT_URL);
+    //printf("latency_url:%s\n", latency_url);
     curl_easy_setopt(curl, CURLOPT_URL, latency_url);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, NULL);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, 3L);
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36");
+    //curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
     curl_easy_cleanup(curl);
 
     if (res != CURLE_OK || response_code != 200) {
-
         //printf("curl_easy_perform() failed: %s %ld\n", curl_easy_strerror(res), response_code);
         return NOK;
     }
@@ -297,6 +317,7 @@ static void* do_download(void* data)
     curl_easy_setopt(curl, CURLOPT_URL, p_para->url);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, p_para);
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36");
     res = curl_easy_perform(curl);
     if (res != CURLE_OK) {
         printf("curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
@@ -512,6 +533,7 @@ static int do_upload(struct thread_para* para)
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, NULL);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, NULL);
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36");
     
     while (loop) {
 
@@ -722,17 +744,17 @@ static int get_best_server(int *p_index)
     double  minimum = DBL_MAX;
     char    server[URL_LENGTH_MAX] = {0};
 
-    for (i = 0; i < MAX_CLOSEST_SERVER_NUM; i++) {
+    for (i = 0; i < MAX_CLOSEST_SERVER_NUM; ++i) {
 
         double latency;
 
         sscanf(servers[i].url, "http://%[^/]speedtest/upload.%*s", server);
         latency = test_latency(server);
         if (minimum > latency ) {
-
             minimum = latency;
             *p_index = i;
         }
+	// printf("test index i:%d url:%s latency:%lf\n\n ", i, server, latency == DBL_MAX ? 0 : latency);
     }
     if (minimum == DBL_MAX)
         return NOK;
