@@ -27,9 +27,11 @@ define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
 	cp $(SOURCE_DIR) ./src/* $(PKG_BUILD_DIR)
 endef
+	mkdir -p $(PKG_BUILD_DIR)
+	cp $(SOURCE_DIR) ./src/* $(PKG_BUILD_DIR)
 define Build/Compile
 	$(MAKE) -C $(PKG_BUILD_DIR) \
-	LDFLAGS="$(TARGET_LDFLAGS)"	
+	LDFLAGS="$(TARGET_LDFLAGS) -lcurl -lpthread -lexpat -lm"	
 endef
 define Build/Configure
 	$(call Build/Configure/Default,--with-linux-headers=$(LINUX_DIR))
