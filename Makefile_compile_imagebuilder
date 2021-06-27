@@ -1,0 +1,40 @@
+include $(TOPDIR)/rules.mk
+
+PKG_NAME:=speedtest
+PKG_VERSION:=1.0.0
+PKG_RELEASE:=2
+
+PKG_BUILD_DIR := $(BUILD_DIR)/$(PKG_NAME)
+
+include $(INCLUDE_DIR)/package.mk
+
+define Package/speedtest
+ SECTION:=utils
+ CATEGORY:=Utilities
+ TITLE:=test kecepatan khusus mips/mipsel
+ DEPENDS:=+libpthread +libexpat +libcurl
+endef
+
+define Package/speedtest/description
+ This is a utility to measure network speed on 
+ Xiaomi routers
+endef
+
+define Build/Prepare
+	mkdir -p $(PKG_BUILD_DIR)
+	cp $(SOURCE_DIR) ./src/* $(PKG_BUILD_DIR)
+endef
+define Build/Compile
+	$(MAKE) -C $(PKG_BUILD_DIR) \
+	LDFLAGS="$(TARGET_LDFLAGS)"	
+endef
+define Build/Configure
+	$(call Build/Configure/Default,--with-linux-headers=$(LINUX_DIR))
+endef
+
+define Package/speedtest/install
+	$(INSTALL_DIR) $(1)/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/speedtest $(1)/bin/
+endef
+
+$(eval $(call BuildPackage,speedtest))
