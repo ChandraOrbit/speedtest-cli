@@ -1,4 +1,4 @@
-# tried on router: xiaomi 4a gigabyte version
+# tried on router with MIPSEL 24kc proc
 # in source run make package/speedtest/compile
 #
 include $(TOPDIR)/rules.mk
