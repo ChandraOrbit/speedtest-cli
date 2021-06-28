@@ -1,4 +1,5 @@
-TOOLCHAIN_DIR=/home/orbit/xiaomi-m4a/staging_dir/toolchain-mipsel_24kc_gcc-7.5.0_musl
+# This Makefile for MIPSEL 24kc proc
+TOOLCHAIN_DIR=/usr/path/openwrt/staging_dir/toolchain-mipsel_24kc_gcc-7.5.0_musl
 INCLUDE_DIR=$(TOOLCHAIN_DIR)/usr/include
 CC=mipsel-openwrt-linux-gcc
 LDFLAGS=-lpthread -lcurl -lexpat -lm
