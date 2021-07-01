@@ -1,5 +1,5 @@
 # This Makefile for MIPSEL 24kc proc
-TOOLCHAIN_DIR=/usr/path/openwrt/staging_dir/toolchain-mipsel_24kc_gcc-7.5.0_musl
+TOOLCHAIN_DIR=$(TOPDIR)/staging_dir/toolchain-mipsel_24kc_gcc-7.5.0_musl
 INCLUDE_DIR=$(TOOLCHAIN_DIR)/usr/include
 CC=mipsel-openwrt-linux-gcc
 LDFLAGS=-lpthread -lcurl -lexpat -lm
